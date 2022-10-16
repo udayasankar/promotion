@@ -1,6 +1,7 @@
 package com.promo.service;
 
 import com.promo.models.OrderedItems;
+import com.promo.response.OrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +13,9 @@ public class PromoService {
     @Autowired
     RuleService ruleService;
 
-    public Integer getOrderTotal(List<OrderedItems> orderedItems) {
+    public OrderResponse getOrderTotal(List<OrderedItems> orderedItems) {
 
-        return ruleService.ruleExecution(orderedItems);
+        return OrderResponse.builder().
+                orderTotal(ruleService.ruleExecution(orderedItems)).build();
     }
 }

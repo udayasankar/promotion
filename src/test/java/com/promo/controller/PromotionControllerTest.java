@@ -2,6 +2,7 @@ package com.promo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.promo.models.OrderedItems;
+import com.promo.response.OrderResponse;
 import com.promo.service.PromoService;
 import com.promo.service.RuleService;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ public class PromotionControllerTest {
     @Test
     void getPromoTestOne() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        OrderResponse orderResponse = OrderResponse.builder().orderTotal(100).build();
         List<OrderedItems> orderedItemsList = new ArrayList<OrderedItems>();
         orderedItemsList.add(OrderedItems.builder().itemId("A").itemQuantity(1).
                 itemPrice(new BigDecimal(50)).promotionId("").build());
@@ -46,7 +48,7 @@ public class PromotionControllerTest {
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("").build());
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
-        given(promoService.getOrderTotal(orderedItemsList)).willReturn(100);
+        given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(100);
         System.out.println(objectMapper.writeValueAsString(orderedItemsList));
         mockMvc.perform(
@@ -55,14 +57,15 @@ public class PromotionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderedItemsList)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isNumber())
-                .andExpect(jsonPath("$").value("100"));
+                .andExpect(jsonPath("$.orderTotal").isNumber())
+                .andExpect(jsonPath("$.orderTotal").value("100"));
         verify(promoService).getOrderTotal(orderedItemsList);
     }
 
     @Test
     void getPromoTestTwo() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        OrderResponse orderResponse = OrderResponse.builder().orderTotal(370).build();
         List<OrderedItems> orderedItemsList = new ArrayList<OrderedItems>();
         orderedItemsList.add(OrderedItems.builder().itemId("A").itemQuantity(5).
                 itemPrice(new BigDecimal(50)).promotionId("A").build());
@@ -71,7 +74,7 @@ public class PromotionControllerTest {
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
         Integer totalValue = ruleService.ruleExecution(orderedItemsList);
-        given(promoService.getOrderTotal(orderedItemsList)).willReturn(370);
+        given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(370);
 
         mockMvc.perform(
@@ -80,8 +83,8 @@ public class PromotionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderedItemsList)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isNumber())
-                .andExpect(jsonPath("$").value("370"));
+                .andExpect(jsonPath("$.orderTotal").isNumber())
+                .andExpect(jsonPath("$.orderTotal").value("370"));
         verify(promoService).getOrderTotal(orderedItemsList);
     }
 
@@ -89,6 +92,7 @@ public class PromotionControllerTest {
     void getPromoTestThree() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         List<OrderedItems> orderedItemsList = new ArrayList<OrderedItems>();
+        OrderResponse orderResponse = OrderResponse.builder().orderTotal(280).build();
         orderedItemsList.add(OrderedItems.builder().itemId("A").itemQuantity(3).
                 itemPrice(new BigDecimal(50)).promotionId("A").build());
         orderedItemsList.add(OrderedItems.builder().itemId("B").
@@ -96,7 +100,7 @@ public class PromotionControllerTest {
         orderedItemsList.add(OrderedItems.builder().itemId("CD").
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("CD").build());
         Integer totalValue = ruleService.ruleExecution(orderedItemsList);
-        given(promoService.getOrderTotal(orderedItemsList)).willReturn(280);
+        given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(280);
 
         mockMvc.perform(
@@ -105,8 +109,8 @@ public class PromotionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(orderedItemsList)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isNumber())
-                .andExpect(jsonPath("$").value("280"));
+                .andExpect(jsonPath("$.orderTotal").isNumber())
+                .andExpect(jsonPath("$.orderTotal").value("280"));
         verify(promoService).getOrderTotal(orderedItemsList);
     }
 

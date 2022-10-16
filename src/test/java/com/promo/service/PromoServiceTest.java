@@ -1,6 +1,7 @@
 package com.promo.service;
 
 import com.promo.models.OrderedItems;
+import com.promo.response.OrderResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,8 +30,8 @@ public class PromoServiceTest {
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("").build());
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
-        Integer totalValue = promoService.getOrderTotal(orderedItemsList);
-        assertEquals(java.util.Optional.of(100).get(), totalValue);
+        OrderResponse orderResponse = promoService.getOrderTotal(orderedItemsList);
+        assertEquals(java.util.Optional.of(100).get(), orderResponse.getOrderTotal());
     }
 
     @Test
@@ -42,8 +43,8 @@ public class PromoServiceTest {
                 itemQuantity(5).itemPrice(new BigDecimal(30)).promotionId("B").build());
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
-        Integer totalValue = promoService.getOrderTotal(orderedItemsList);
-        assertEquals(java.util.Optional.of(370).get(), totalValue);
+        OrderResponse orderResponse = promoService.getOrderTotal(orderedItemsList);
+        assertEquals(java.util.Optional.of(370).get(), orderResponse.getOrderTotal());
     }
 
     @Test
@@ -55,7 +56,7 @@ public class PromoServiceTest {
                 itemQuantity(5).itemPrice(new BigDecimal(30)).promotionId("B").build());
         orderedItemsList.add(OrderedItems.builder().itemId("CD").
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("CD").build());
-        Integer totalValue = promoService.getOrderTotal(orderedItemsList);
-        assertEquals(java.util.Optional.of(280).get(), totalValue);
+        OrderResponse orderResponse = promoService.getOrderTotal(orderedItemsList);
+        assertEquals(java.util.Optional.of(280).get(), orderResponse.getOrderTotal());
     }
 }

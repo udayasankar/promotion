@@ -1,6 +1,7 @@
 package com.promo.controller;
 
 import com.promo.models.OrderedItems;
+import com.promo.response.OrderResponse;
 import com.promo.service.PromoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class PromotionController {
     PromoService promoService;
 
     @PostMapping("/getOrderTotal")
-    public Integer getOrderTotal(@RequestBody List<OrderedItems> orderedItems) {
+    public OrderResponse getOrderTotal(@RequestBody List<OrderedItems> orderedItems) {
         return promoService.getOrderTotal(orderedItems);
     }
 }
