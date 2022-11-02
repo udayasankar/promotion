@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 
 @Builder
 @Data
-public class OrderedItems {
+public class CartItems {
+
     @NotBlank(message = "ItemId is mandatory")
     private String itemId;
 
@@ -18,6 +19,4 @@ public class OrderedItems {
 
     @NotNull(message = "ItemPrice cannot be null")
     private BigDecimal itemPrice;
-
-    private String promotionId;
 }

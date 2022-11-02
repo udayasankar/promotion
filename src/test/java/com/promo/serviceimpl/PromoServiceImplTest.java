@@ -1,7 +1,9 @@
-package com.promo.service;
+package com.promo.serviceimpl;
 
+import com.promo.models.CartItems;
 import com.promo.models.OrderedItems;
 import com.promo.response.OrderResponse;
+import com.promo.servicesimpl.RuleServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,13 +15,26 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class PromoServiceTest {
+public class PromoServiceImplTest {
 
     @Autowired
-    RuleService ruleService;
+    RuleServiceImpl ruleService;
 
     @Autowired
     PromoService promoService;
+
+    @Test
+    void applyPromotionTest() {
+        List<CartItems> cartItemsList = new ArrayList<>();
+        cartItemsList.add(CartItems.builder().itemId("A").itemQuantity(1).
+                itemPrice(new BigDecimal(50)).build());
+        cartItemsList.add(CartItems.builder().itemId("B").
+                itemQuantity(1).itemPrice(new BigDecimal(30)).build());
+        cartItemsList.add(CartItems.builder().itemId("C").
+                itemQuantity(1).itemPrice(new BigDecimal(20)).build());
+        List<OrderedItems> orderedItemsList = promoService.applyPromotions(cartItemsList);
+        assertEquals(3, orderedItemsList.size());
+    }
 
     @Test
     void promoGetOrderTotalTestOne() {

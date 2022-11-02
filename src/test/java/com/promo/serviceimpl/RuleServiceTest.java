@@ -1,6 +1,7 @@
-package com.promo.service;
+package com.promo.serviceimpl;
 
 import com.promo.models.OrderedItems;
+import com.promo.servicesimpl.RuleServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RuleServiceTest {
 
     @Autowired
-    private RuleService ruleService;
+    private RuleServiceImpl ruleService;
 
     @Test
     void ruleExecutionTestOne() {

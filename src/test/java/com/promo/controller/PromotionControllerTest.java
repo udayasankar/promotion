@@ -3,15 +3,18 @@ package com.promo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.promo.models.OrderedItems;
 import com.promo.response.OrderResponse;
-import com.promo.service.PromoService;
-import com.promo.service.RuleService;
+import com.promo.serviceimpl.PromoService;
+import com.promo.servicesimpl.RuleServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -24,8 +27,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = PromotionController.class)
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
+@WebMvcTest(PromotionController.class)
 public class PromotionControllerTest {
 
     @Autowired
@@ -35,7 +38,7 @@ public class PromotionControllerTest {
     private PromoService promoService;
 
     @MockBean
-    private RuleService ruleService;
+    private RuleServiceImpl ruleService;
 
     @Test
     void getPromoTestOne() throws Exception {

@@ -11,7 +11,9 @@ import java.util.List;
 public class ActivePromotions {
 
     private String promoItemId;
+    private String itemId;
     private List<String> promoItemIds;
+    private Integer promoItemNo;
     private Integer promotionNo;
     private BigDecimal promotionItemPrice;
 

@@ -1,17 +1,18 @@
-package com.promo.service;
+package com.promo.servicesimpl;
 
 import com.promo.dao.ActivePromotionsDao;
 import com.promo.dao.ItemInfoDao;
 import com.promo.models.ActivePromotions;
 import com.promo.models.ItemInfo;
 import com.promo.models.OrderedItems;
+import com.promo.serviceimpl.RuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class RuleService {
+public class RuleServiceImpl implements RuleService {
 
     @Autowired
     ActivePromotionsDao activePromotionsDao;
@@ -19,12 +20,27 @@ public class RuleService {
     @Autowired
     ItemInfoDao itemInfoDao;
 
-    public Integer ruleExecution(List<OrderedItems> orderedItemsList) {
-        Integer totalPrice = 0;
-        int partialQty = 0;
-        ActivePromotions activePromotions = null;
-        for (OrderedItems orderedItems : orderedItemsList) {
+    Integer totalPrice = 0;
 
+    public Integer ruleExecution(List<OrderedItems> orderedItemsList) {
+          ActivePromotions activePromotions = null;
+            totalPrice=0;
+        for (OrderedItems orderedItems : orderedItemsList) {
+            boolean returnVal = nItemsPromotionRule(orderedItems, activePromotions);
+            if(!returnVal) {
+                returnVal = fixedPricePromotionRule(orderedItems, activePromotions);
+            }
+            if(!returnVal)
+            {
+                returnVal = noPromotionItemsRules(orderedItems, activePromotions);
+            }
+        }
+        return totalPrice;
+    }
+
+        @Override
+        public boolean nItemsPromotionRule(OrderedItems orderedItems, ActivePromotions activePromotions) {
+            int partialQty = 0;
             if (activePromotionsDao.getActivePromotion().containsKey(orderedItems.getPromotionId())) {
                 activePromotions = activePromotionsDao.getActivePromotion()
                         .get(orderedItems.getPromotionId());
@@ -42,12 +58,26 @@ public class RuleService {
                         partialQty = partialQty - activePromotions.getPromotionNo();
                     }
                 }
-            } else {
-                ItemInfo itemInfo = itemInfoDao.getItemInfoMap().get(orderedItems.getItemId());
-                totalPrice = totalPrice + (
-                        orderedItems.getItemQuantity() * itemInfo.getItemPrice().intValue());
+                return true;
             }
+            return false;
         }
-        return totalPrice;
-    }
+
+        @Override
+        public boolean fixedPricePromotionRule(OrderedItems orderedItems, ActivePromotions activePromotions) {
+            if(!orderedItems.getPromotionId().equals(""))
+            {
+                totalPrice = totalPrice + orderedItems.getItemPrice().intValue();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean noPromotionItemsRules(OrderedItems orderedItems, ActivePromotions activePromotions) {
+              ItemInfo itemInfo = itemInfoDao.getItemInfoMap().get(orderedItems.getItemId());
+              totalPrice = totalPrice + (
+                      orderedItems.getItemQuantity() * itemInfo.getItemPrice().intValue());
+              return true;
+        }
 }
