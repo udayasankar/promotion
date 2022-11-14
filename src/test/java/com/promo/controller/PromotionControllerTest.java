@@ -1,20 +1,17 @@
 package com.promo.controller;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.promo.models.CartItems;
 import com.promo.models.OrderedItems;
 import com.promo.response.OrderResponse;
-import com.promo.serviceimpl.PromoService;
-import com.promo.servicesimpl.RuleServiceImpl;
+import com.promo.service.PromoService;
+import com.promo.service.RuleService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -27,18 +24,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(PromotionController.class)
 public class PromotionControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @MockBean
     private PromoService promoService;
 
     @MockBean
-    private RuleServiceImpl ruleService;
+    private RuleService ruleService;
 
     @Test
     void getPromoTestOne() throws Exception {
@@ -51,14 +47,21 @@ public class PromotionControllerTest {
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("").build());
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
+        List<CartItems> cartItemsList = new ArrayList<>();
+        cartItemsList.add(CartItems.builder().itemId("A").itemQuantity(1).
+                itemPrice(new BigDecimal(50)).build());
+        cartItemsList.add(CartItems.builder().itemId("B").
+                itemQuantity(1).itemPrice(new BigDecimal(30)).build());
+        cartItemsList.add(CartItems.builder().itemId("C").
+                itemQuantity(1).itemPrice(new BigDecimal(20)).build());
+        given(promoService.applyPromotions(cartItemsList)).willReturn(orderedItemsList);
         given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(100);
-        System.out.println(objectMapper.writeValueAsString(orderedItemsList));
         mockMvc.perform(
                 post("/api/v1/promotion/getOrderTotal")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderedItemsList)))
+                        .content(objectMapper.writeValueAsString(cartItemsList)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderTotal").isNumber())
                 .andExpect(jsonPath("$.orderTotal").value("100"));
@@ -76,15 +79,21 @@ public class PromotionControllerTest {
                 itemQuantity(5).itemPrice(new BigDecimal(30)).promotionId("B").build());
         orderedItemsList.add(OrderedItems.builder().itemId("C").
                 itemQuantity(1).itemPrice(new BigDecimal(20)).promotionId("").build());
-        Integer totalValue = ruleService.ruleExecution(orderedItemsList);
+        List<CartItems> cartItemsList = new ArrayList<>();
+        cartItemsList.add(CartItems.builder().itemId("A").itemQuantity(5).
+                itemPrice(new BigDecimal(50)).build());
+        cartItemsList.add(CartItems.builder().itemId("B").
+                itemQuantity(5).itemPrice(new BigDecimal(30)).build());
+        cartItemsList.add(CartItems.builder().itemId("C").
+                itemQuantity(1).itemPrice(new BigDecimal(20)).build());
+        given(promoService.applyPromotions(cartItemsList)).willReturn(orderedItemsList);
         given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(370);
-
         mockMvc.perform(
                 post("/api/v1/promotion/getOrderTotal")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderedItemsList)))
+                        .content(objectMapper.writeValueAsString(cartItemsList)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderTotal").isNumber())
                 .andExpect(jsonPath("$.orderTotal").value("370"));
@@ -100,9 +109,20 @@ public class PromotionControllerTest {
                 itemPrice(new BigDecimal(50)).promotionId("A").build());
         orderedItemsList.add(OrderedItems.builder().itemId("B").
                 itemQuantity(5).itemPrice(new BigDecimal(30)).promotionId("B").build());
-        orderedItemsList.add(OrderedItems.builder().itemId("CD").
+        orderedItemsList.add(OrderedItems.builder().itemId("C").
+                itemQuantity(1).itemPrice(new BigDecimal(0)).promotionId("CD").build());
+        orderedItemsList.add(OrderedItems.builder().itemId("D").
                 itemQuantity(1).itemPrice(new BigDecimal(30)).promotionId("CD").build());
-        Integer totalValue = ruleService.ruleExecution(orderedItemsList);
+        List<CartItems> cartItemsList = new ArrayList<>();
+        cartItemsList.add(CartItems.builder().itemId("A").itemQuantity(3).
+                itemPrice(new BigDecimal(50)).build());
+        cartItemsList.add(CartItems.builder().itemId("B").
+                itemQuantity(5).itemPrice(new BigDecimal(30)).build());
+        cartItemsList.add(CartItems.builder().itemId("C").
+                itemQuantity(1).itemPrice(new BigDecimal(20)).build());
+        cartItemsList.add(CartItems.builder().itemId("D").
+                itemQuantity(1).itemPrice(new BigDecimal(15)).build());
+        given(promoService.applyPromotions(cartItemsList)).willReturn(orderedItemsList);
         given(promoService.getOrderTotal(orderedItemsList)).willReturn(orderResponse);
         given(ruleService.ruleExecution(orderedItemsList)).willReturn(280);
 
@@ -110,7 +130,7 @@ public class PromotionControllerTest {
                 post("/api/v1/promotion/getOrderTotal")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(orderedItemsList)))
+                        .content(objectMapper.writeValueAsString(cartItemsList)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.orderTotal").isNumber())
                 .andExpect(jsonPath("$.orderTotal").value("280"));

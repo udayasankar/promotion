@@ -5,8 +5,9 @@ import com.promo.models.ActivePromotions;
 import com.promo.models.CartItems;
 import com.promo.models.OrderedItems;
 import com.promo.response.OrderResponse;
-import com.promo.serviceimpl.PromoService;
-import com.promo.serviceimpl.RuleService;
+import com.promo.service.PromoService;
+import com.promo.service.RuleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -19,6 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PromoServiceImpl implements PromoService {
 
     @Autowired
@@ -30,12 +32,14 @@ public class PromoServiceImpl implements PromoService {
     Map<String, CartItems> cartItemsMap;
 
     public OrderResponse getOrderTotal(List<OrderedItems> orderedItems) {
+        log.info("In PromoServiceImpl getOrderTotal");
         return OrderResponse.builder().
                 orderTotal(ruleService.ruleExecution(orderedItems)).build();
     }
 
     @Override
     public List<OrderedItems> applyPromotions(List<CartItems> cartItemsList) {
+        log.info("In PromoServiceImpl applyPromotions");
         List<OrderedItems> orderedItemsList = new ArrayList<>();
         cartItemsMap = cartItemsList.stream()
                 .collect(Collectors.toMap(CartItems::getItemId, Function.identity()));
@@ -57,6 +61,7 @@ public class PromoServiceImpl implements PromoService {
     public boolean nItemsPromotion(Optional<CartItems> cartItems, List<OrderedItems> orderedItemsList, ActivePromotions activePromotions) {
         if (cartItems.isPresent() && cartItems.get().getItemId().equals(activePromotions.getPromoItemId()) &&
                 cartItems.get().getItemQuantity() >= activePromotions.getPromotionNo()) {
+            log.info("In PromoServiceImpl executing nItemsPromotion for : {} {}", cartItems.get().getItemId(), activePromotions.getPromoItemIds());
             orderedItemsList.add(OrderedItems.builder().itemId(cartItems.get().getItemId())
                     .itemQuantity(cartItems.get().getItemQuantity())
                     .itemPrice(cartItems.get().getItemPrice())
@@ -68,22 +73,23 @@ public class PromoServiceImpl implements PromoService {
 
     @Override
     public boolean fixedPricePromotion(Optional<CartItems> cartItems, List<OrderedItems> orderedItemsList, ActivePromotions activePromotions) {
-        if(!ObjectUtils.isEmpty(activePromotions.getPromoItemIds())) {
-            String searchVal = activePromotions.getPromoItemIds().get(activePromotions.getPromoItemIds().size()-1);
+        if (!ObjectUtils.isEmpty(activePromotions.getPromoItemIds())) {
+            if (cartItems.isPresent())
+                log.info("In PromoServiceImpl executing fixedPricePromotion for : {} {}", cartItems.get().getItemId(),
+                        activePromotions.getPromoItemIds());
+            String searchVal = activePromotions.getPromoItemIds().get(activePromotions.getPromoItemIds().size() - 1);
             Optional<List<String>> promoItemsList = Optional.ofNullable(activePromotions.getPromoItemIds().stream().
                     filter(ap -> ap.equals(searchVal) && cartItemsMap.containsKey(searchVal))
                     .collect(Collectors.toList()));
             if (cartItems.isPresent() && cartItems.get().getItemId().equals(activePromotions.getItemId()) &&
-            cartItems.get().getItemQuantity() == activePromotions.getPromotionNo() &&
-            promoItemsList.get().size()>0) {
-                if(cartItems.get().getItemId().equals(promoItemsList.get().get(0))) {
+                    cartItems.get().getItemQuantity() == activePromotions.getPromotionNo() &&
+                    promoItemsList.get().size() > 0) {
+                if (cartItems.get().getItemId().equals(promoItemsList.get().get(0))) {
                     orderedItemsList.add(OrderedItems.builder().itemId(cartItems.get().getItemId())
                             .itemQuantity(cartItems.get().getItemQuantity())
                             .itemPrice(activePromotions.getPromotionItemPrice())
                             .promotionId(activePromotions.getPromoItemId()).build());
-                }
-                else
-                {
+                } else {
                     orderedItemsList.add(OrderedItems.builder().itemId(cartItems.get().getItemId())
                             .itemQuantity(cartItems.get().getItemQuantity())
                             .itemPrice(activePromotions.getPromotionItemPrice())
@@ -97,7 +103,8 @@ public class PromoServiceImpl implements PromoService {
 
     @Override
     public boolean noPromotionItems(Optional<CartItems> cartItems, List<OrderedItems> orderedItemsList, ActivePromotions activePromotions) {
-        if(orderedItemsList.size() < cartItemsMap.size()) {
+        if (orderedItemsList.size() < cartItemsMap.size()) {
+            log.info("In PromoServiceImpl executing noPromotionItems for : {} {}", cartItems.get().getItemId(), activePromotions.getPromoItemIds());
             orderedItemsList.add(OrderedItems.builder().itemId(cartItems.get().getItemId())
                     .itemQuantity(cartItems.get().getItemQuantity())
                     .itemPrice(cartItems.get().getItemPrice())
